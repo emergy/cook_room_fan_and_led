@@ -143,14 +143,37 @@ void updatePin(int pin, int value) {
 }
 
 void handleStatus() {
-    String message = "Power status: ";
-    message += (pwr_status == 1)?"on":"off";
-    message += "\nFan status: ";
-    message += (fan_status == 1)?"on":"off";
-    message += "\nLed status: ";
-    message += (led_status == 1)?"on":"off";
-    message += "\n";
-    server.send(200, "text/plain", message);
+    char pwr_status_buf[4];
+    char fan_status_buf[4];
+    char led_status_buf[4];
+
+    sprintf(pwr_status_buf, "%d", pwr_status);
+    sprintf(fan_status_buf, "%d", fan_status);
+    sprintf(led_status_buf, "%d", led_status);
+
+    if (server.hasArg("json") && server.arg("json").toInt() == 1) {
+        String message = "{\n";
+        message += "  \"power_status\" : \"";
+        message += pwr_status_buf;
+        message += "\",\n";
+        message += "  \"fan_status\" : \"";
+        message += fan_status_buf;
+        message += "\",\n";
+        message += "  \"led_status\" : \"";
+        message += led_status_buf;
+        message += "\"\n";
+        message += "}\n";
+        server.send(200, "application/json", message);
+    } else {
+        String message = "Power status: ";
+        message += (pwr_status == 1)?"on":"off";
+        message += "\nFan status: ";
+        message += fan_status_buf;
+        message += "\nLed status: ";
+        message += led_status_buf;
+        message += "\n";
+        server.send(200, "text/plain", message);
+    }
 }
 
 void handleNotFound(){
